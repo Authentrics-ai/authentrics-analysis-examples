@@ -14,7 +14,7 @@ from authentrics import (
     use_backend,
 )
 
-from .models.MilAirClass import MilAirModel
+from models.MilAirClass import MilAirModel
 
 
 def _make_capture_hook(layer_name: str, storage: dict[str, torch.Tensor]) -> object:

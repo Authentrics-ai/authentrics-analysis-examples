@@ -6,7 +6,7 @@ import torch
 
 from authentrics import AuthentricsSession, ModelInterface, WeightBias, use_backend
 
-from .models.MilAirClass import MilAirModel
+from models.MilAirClass import MilAirModel
 
 
 class SimpleModel(ModelInterface):

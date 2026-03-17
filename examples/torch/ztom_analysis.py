@@ -23,7 +23,7 @@ from authentrics import (
     use_backend,
 )
 
-from .models.MilAirClass import MilAirModel
+from models.MilAirClass import MilAirModel
 
 
 def preprocess_image(image_file: Path) -> torch.Tensor:
