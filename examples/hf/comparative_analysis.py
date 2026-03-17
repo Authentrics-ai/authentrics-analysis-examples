@@ -181,6 +181,7 @@ if __name__ == "__main__":
     # Initialize a project (required for analysis operations)
     project_path = Path("./my_hf_analysis_project")
     if not project_path.exists() or not (project_path / ".authentrics.json").exists():
+        project_path.mkdir(parents=True, exist_ok=True)
         project = session.init_project(
             project_path,
             "example_hf_project_" + str(uuid.uuid4()),
