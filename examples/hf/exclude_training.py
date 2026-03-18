@@ -107,8 +107,6 @@ if __name__ == "__main__":
         Path(f"/models/MedicalChatbot/iteration_{i}") for i in range(1, 8)
     ]
 
-    new_checkpoint_path = Path("./checkpoint_excluded")
-
     # Initialize a project (required for analysis operations)
     project_path = Path("./my_hf_analysis_project")
     if not project_path.exists() or not (project_path / ".authentrics.json").exists():
@@ -124,6 +122,8 @@ if __name__ == "__main__":
     if not project.checkpoints:
         # Register all checkpoints, then select the ones needed for the analysis
         project = session.add_checkpoints(project, *checkpoint_paths)
+
+    new_checkpoint_path = project_path / "checkpoint_excluded"
 
     # Run exclude_training (project, list of (Checkpoint, Checkpoint), latest Checkpoint, new path)
     # Example: exclude training from checkpoint 3->4, apply to latest checkpoint

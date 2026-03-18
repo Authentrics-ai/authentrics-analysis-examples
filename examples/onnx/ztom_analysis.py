@@ -152,12 +152,12 @@ if __name__ == "__main__":
     checkpoint_paths = [
         Path(f"/models/MilAirClassification/checkpoint_{i}.onnx") for i in range(1, 4)
     ]
-    new_checkpoint_path = Path("./checkpoint_optimized.onnx")
-
     session.model = model
 
     # Register checkpoints with the project
     project = session.add_checkpoints(project, *checkpoint_paths)
+
+    new_checkpoint_path = project_path / "checkpoint_optimized.onnx"
 
     # Optional: tune optimization (defaults are often sufficient)
     options = ZtomOptimizationOptions(

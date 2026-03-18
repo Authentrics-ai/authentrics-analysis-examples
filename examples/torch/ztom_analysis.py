@@ -133,7 +133,6 @@ if __name__ == "__main__":
     checkpoint_paths = [
         Path(f"/models/MilAirClassification/checkpoint_{i}.pt") for i in range(1, 4)
     ]
-    new_checkpoint_path = Path("./checkpoint_optimized.pt")
 
     if not project_path.exists() or not (project_path / ".authentrics.json").exists():
         project = session.create_project(
@@ -147,6 +146,8 @@ if __name__ == "__main__":
     # Register checkpoints with the project
     if not project.checkpoints:
         project = session.add_checkpoints(project, *checkpoint_paths)
+
+    new_checkpoint_path = project_path / "checkpoint_optimized.pt"
 
     # Optional: tune optimization (defaults are often sufficient)
     options = ZtomOptimizationOptions(

@@ -58,7 +58,6 @@ if __name__ == "__main__":
     checkpoint_paths = [
         Path(f"/models/MilAirClassification/checkpoint_{i}.onnx") for i in range(1, 8)
     ]
-    new_checkpoint_path = Path("./checkpoint_excluded.onnx")
 
     # Create a session and a minimal model
     session = AuthentricsSession()
@@ -77,6 +76,8 @@ if __name__ == "__main__":
 
     # Register checkpoints with the project
     project = session.add_checkpoints(project, *checkpoint_paths)
+
+    new_checkpoint_path = project_path / "checkpoint_excluded.onnx"
 
     # Run exclude_training (project, list of (Checkpoint, Checkpoint), latest Checkpoint, new path)
     # Example: exclude training from checkpoint 3->4, apply to latest checkpoint
