@@ -5,20 +5,28 @@ This repository contains examples of using the Authentrics SDK.
 ## Installation
 
 ```bash
-python -m venv .venv
+# Create a virtual environment
+python3 -m venv .venv
+
+# Set the extra index url for the virtual environment to download the Authentrics SDK from the Google Cloud Package Registry
+echo -e "[global]\nextra-index-url = https://us-central1-python.pkg.dev/authentrics/authentrics/simple\n" > .venv/pip.conf
+
+# Activate the virtual environment
 source .venv/bin/activate
 
-pip install -r requirements.txt
+# Install the Google Cloud Package Registry authentication library
+pip install keyrings.google-artifactregistry-auth
 
-pip install -e '.[all]' --index-url https://us-central1-python.pkg.dev/authentrics/authentrics/simple
+# Install the Authentrics SDK and all the dependencies
+pip install -e '.[all]'
 ```
 
 If you want to try only a specific set of examples, you can install the optional dependencies:
 
 ```bash
-pip install -e '.[torch]' --index-url https://us-central1-python.pkg.dev/authentrics/authentrics/simple
-pip install -e '.[hf]' --index-url https://us-central1-python.pkg.dev/authentrics/authentrics/simple
-pip install -e '.[onnx]' --index-url https://us-central1-python.pkg.dev/authentrics/authentrics/simple
+pip install -e '.[torch]'
+pip install -e '.[hf]'
+pip install -e '.[onnx]'
 ```
 
 ## Running the examples
