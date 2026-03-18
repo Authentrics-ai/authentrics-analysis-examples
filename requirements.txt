@@ -1,1 +1,0 @@
-keyrings.google-artifactregistry-auth
