@@ -3,7 +3,7 @@ name = "authentrics-examples"
 version = "0.1.0"
 description = "Authentrics Examples"
 requires-python = ">=3.11,<3.14"
-dependencies = ["authentrics==0.21.0"]
+dependencies = ["authentrics==0.21.1"]
 authors = [
     { name = "Michael Jacobs", email = "michael.jacobs@authentrics.ai" },
     { name = "Bimarsh Neupane", email = "bimarsh.neupane@authentrics.ai" },
