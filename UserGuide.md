@@ -29,8 +29,7 @@ The Authentrics wheel is published for **Linux x86_64** and requires **Python 3.
 
 ```bash
 pip install authentrics \
-  --index-url https://us-central1-python.pkg.dev/authentrics/authentrics-repo/simple/ \
-  --extra-index-url https://pypi.org/simple/
+  --index-url https://us-central1-python.pkg.dev/authentrics/authentrics-repo/simple/
 ```
 
 Authentication to the registry uses your Google Application Default Credentials. If you haven't already:
@@ -43,9 +42,14 @@ pip install keyrings.google-artifactregistry-auth
 To pin a specific version:
 
 ```bash
-pip install authentrics==<x.y.z> \
-  --index-url https://us-central1-python.pkg.dev/authentrics/authentrics-repo/simple/ \
-  --extra-index-url https://pypi.org/simple/
+pip install 'authentrics==<x.y.z>' \
+  --index-url https://us-central1-python.pkg.dev/authentrics/authentrics-repo/simple/
+```
+
+Or, if you have the wheel file (e.g., `authentrics-0.27.0-py3-none-manylinux_2_39_x86_64.whl`):
+
+```bash
+pip install ./authentrics-0.27.0-py3-none-manylinux_2_39_x86_64.whl
 ```
 
 > **macOS users:** see the §"Running on macOS" section at the end of this guide.
