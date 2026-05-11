@@ -5,105 +5,39 @@ to minimize a user-defined loss on the model output. The project must have at le
 two checkpoints (order matters: they define the sequence of training deltas).
 """
 
-import uuid
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import torch
-import torch.nn as nn
-from PIL import Image
 
-from authentrics import (
-    AuthentricsSession,
-    InferenceResult,
-    ModelInterface,
-    WeightBias,
-    ZtomOptimizationOptions,
-    use_backend,
-)
-
-from models.MilAirClass import MilAirModel
+from typing import Any
 
 
-def preprocess_image(image_file: Path) -> torch.Tensor:
-    """Load and preprocess an image to CHW float32 tensor in [0, 1]."""
-    image = Image.open(image_file).convert("RGB").resize((224, 224))
-    arr = torch.from_numpy(np.array(image, dtype=np.float32)).permute(2, 0, 1)
-    return arr / 255.0
+from authentrics import AuthentricsSession, ZtomOptimizationOptions, use_backend
+
+from authentrics_examples.models.torch import SimpleModel, preprocess_image
+from authentrics_examples.config import get_example_data_path
 
 
-def _get_stimuli_tensor() -> torch.Tensor:
-    """Load stimuli from /stimuli/F*.jpg."""
-    stimuli_dir = Path("/stimuli")
-    stimuli = sorted(stimuli_dir.glob("F*.jpg"))
-    return torch.stack([preprocess_image(p) for p in stimuli])
+def _get_input_data(stimuli: Path) -> Any:
+    if not stimuli.exists():
+        raise FileNotFoundError(f"Stimuli file not found: {stimuli}")
+
+    arrays = []
+    for stimulus in sorted(stimuli.glob("*.jpg")):
+        arrays.append(preprocess_image(stimulus))
+
+    return torch.stack(arrays, dim=0)
 
 
-class SimpleModel(ModelInterface):
-    """PyTorch model that loads/saves state dicts and exposes weight/bias for ZTOM."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._module = MilAirModel()
-        self._device = "cpu"
-
-        if torch.cuda.is_available():
-            self._device = "cuda"
-        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-            self._device = "mps"
-        self._input_data = _get_stimuli_tensor().to(device=self._device)
-
-    def load(self, checkpoint_path: Path | str | bytes) -> None:
-        path = Path(checkpoint_path)
-        state = torch.load(path, map_location="cpu", weights_only=True)
-        self._module.load_state_dict(state["model"], strict=True)
-
-        self._module.to(device=self._device)
-        self._module.eval()
-
-    def get_weight_bias(
-        self,
-        weight_names: Optional[list[str]] = None,
-        bias_names: Optional[list[str]] = None,
-    ) -> WeightBias:
-        weights = {}
-        biases = {}
-        for name, param in self._module.named_parameters():
-            last_part = name.rsplit(".", 1)[-1]
-            if last_part == "weight":
-                if weight_names is None or name in weight_names:
-                    weights[name] = param
-            elif last_part == "bias":
-                if bias_names is None or name in bias_names:
-                    biases[name] = param
-        return weights, biases
-
-    def perform_inference(
-        self,
-        return_intermediate_outputs: bool = False,
-        layer_names: Optional[list[str]] = None,
-    ) -> InferenceResult:
-        with torch.no_grad():
-            output = self._module(self._input_data)
-        return InferenceResult(output, {})
-
-    def set_weight_bias(self, weight_bias: WeightBias) -> None:
-        state = {n: p for n, p in self._module.named_parameters()}
-        for name, tensor in weight_bias.weights.items():
-            if name in state:
-                state[name].data.copy_(tensor)
-        for name, tensor in weight_bias.biases.items():
-            if name in state:
-                state[name].data.copy_(tensor)
-
-    def save(self, checkpoint_path: Path | str | bytes) -> None:
-        path = Path(checkpoint_path)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        torch.save({"model": self._module.state_dict()}, path)
+def _get_expected_output(output_path: Path) -> np.ndarray:
+    if not output_path.exists():
+        raise FileNotFoundError(f"Output file not found: {output_path}")
+    outputs = np.loadtxt(output_path, delimiter=",")
+    return torch.as_tensor(outputs).argmax(dim=1)
 
 
-def milair_loss_function(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
+def _milair_loss_function(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     """
     Computes the categorical cross-entropy loss between y_true and y_pred.
 
@@ -114,66 +48,61 @@ def milair_loss_function(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
         scalar float loss.
     """
     return float(
-        nn.functional.cross_entropy(
+        torch.nn.functional.cross_entropy(
             y_pred,
             y_true.to(y_pred.device).long(),
         ).item()
     )
 
 
-if __name__ == "__main__":
+def main():
+    # Set the backend to torch
     use_backend("torch")
-    # Create a session and a minimal model
-    session = AuthentricsSession()
-    model = SimpleModel()
-    session.model = model
 
-    # Initialize a project (required for analysis operations)
-    project_path = Path("./my_ztom_project")
-    checkpoint_paths = [
-        Path(f"/models/MilAirClassification/checkpoint_{i}.pt") for i in range(1, 4)
-    ]
-
-    if not project_path.exists() or not (project_path / ".authentrics.json").exists():
-        project = session.create_project(
-            project_path,
-            "ztom_example_" + str(uuid.uuid4()),
-            "Example project for ZTOM analysis",
-        )
-    else:
-        project = session.load_project(project_path)
-
-    # Register checkpoints with the project
-    if not project.checkpoints:
-        project = session.add_checkpoints(project, *checkpoint_paths)
-
-    new_checkpoint_path = project_path / "checkpoint_optimized.pt"
-
-    # Optional: tune optimization (defaults are often sufficient)
-    options = ZtomOptimizationOptions(
-        max_evaluations=50,
-        xtol_rel=1e-4,
-        ftol_rel=1e-4,
-        lower_bound=-1.0,
-        upper_bound=1.0,
-        minimize=True,
+    example_data_path = get_example_data_path(
+        ["stimuli", "expected_outputs.csv", "checkpoint_1.pt"]
     )
 
-    y_true = torch.tensor([9, 9, 9, 10, 13, 13, 13], dtype=torch.long)
+    input_data = _get_input_data(example_data_path / "stimuli")
+    expected_output = _get_expected_output(example_data_path / "expected_outputs.csv")
+
+    # Create a session and a minimal model
+    model = SimpleModel()
+    session = AuthentricsSession(model)
+
+    # Example checkpoint paths - update these to match your actual checkpoint files
+    checkpoint_paths = [example_data_path / f"checkpoint_{i}.pt" for i in range(1, 8)]
+    if any(not checkpoint.exists() for checkpoint in checkpoint_paths):
+        raise FileNotFoundError(f"Checkpoint files not found: {checkpoint_paths}")
+
+    # Initialize a project (required for analysis operations)
+    project = session.get_or_create_project(
+        "MilAirClassificationExample:Torch",
+        "Example project for Torch-based CNN model",
+    )
+
+    # Optional: tune optimization (defaults are often sufficient)
+    options = ZtomOptimizationOptions()
 
     # loss_function: callable(model_output) -> float
-    # can be passed directly or as LossFunction(loss_function)
+    # can be passed directly as a lambda or normal function
     result = session.ztom_analysis(
-        project,
-        lambda y_pred: milair_loss_function(y_true, y_pred),
-        new_checkpoint_path,
-        options,
+        project.id,
+        checkpoint_paths,
+        input_data,
+        loss_function=lambda y_pred: _milair_loss_function(expected_output, y_pred),
+        new_checkpoint_path=example_data_path / "checkpoint_optimized.pt",
+        optimization_options=options,
     )
 
     print("ZTOM analysis completed.")
-    print(f"Optimized checkpoint saved to: {result.optimized_checkpoint_path}")
+    print(f"Optimized checkpoint saved to: {result.new_checkpoint_path}")
     print(
         f"Original loss: {result.original_loss:.6f}, best loss: {result.best_loss:.6f}"
     )
     print(f"Scaling factors: {result.scaling_factors}")
     print(f"Number of inferences: {result.number_of_inferences}")
+
+
+if __name__ == "__main__":
+    main()

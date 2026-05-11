@@ -1,45 +1,40 @@
+import json
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-
 from authentrics import AuthentricsSession, use_backend
 
-from authentrics_examples.models.torch import SimpleModel, preprocess_image
+from authentrics_examples.models.hf import SimpleHFModel
 from authentrics_examples.config import get_example_data_path
 
 
 def _get_input_data(stimuli: Path) -> Any:
     if not stimuli.exists():
         raise FileNotFoundError(f"Stimuli file not found: {stimuli}")
-
-    arrays = []
-    for stimulus in sorted(stimuli.glob("*.jpg")):
-        arrays.append(preprocess_image(stimulus))
-
-    return np.stack(arrays, axis=0)
+    with open(stimuli, "r") as f:
+        return [json.loads(line) for line in f]
 
 
 def main():
     # Set the backend to torch
     use_backend("torch")
 
-    example_data_path = get_example_data_path(["stimuli", "checkpoint_1.pt"])
-    input_data = _get_input_data(example_data_path / "stimuli")
+    example_data_path = get_example_data_path(["stimuli.jsonl", "iteration_0"])
+    input_data = _get_input_data(example_data_path / "stimuli.jsonl")
 
     # Create a session and a minimal model
-    model = SimpleModel()
+    model = SimpleHFModel(inference_config={"max_new_tokens": 50}, batch_size=1)
     session = AuthentricsSession(model)
 
     # Example checkpoint paths - update these to match your actual checkpoint files
-    checkpoint_paths = [example_data_path / f"checkpoint_{i}.pt" for i in range(1, 8)]
+    checkpoint_paths = [example_data_path / f"iteration_{i}" for i in range(4)]
     if any(not checkpoint.exists() for checkpoint in checkpoint_paths):
         raise FileNotFoundError(f"Checkpoint files not found: {checkpoint_paths}")
 
     # Initialize a project (required for analysis operations)
     project = session.get_or_create_project(
-        "MilAirClassificationExample:Torch",
-        "Example project for Torch-based CNN model",
+        "MedicalChatbotExample",
+        "Example project for Hugging Face-based LLM",
     )
 
     # Run correlation_analysis (project id, chosen checkpoint, input data, list of layer names, reference layer name)
@@ -49,10 +44,10 @@ def main():
         checkpoint_paths[1],
         input_data,
         layer_names=[
-            "squeeze_edit_model.features.6.1.block.2.fc2",
-            "squeeze_edit_model.classifier.1",
+            "model.layers.10.mlp.down_proj.lora_A.default",
+            "model.layers.10.mlp.down_proj.lora_B.default",
         ],
-        reference_layer_name="squeeze_edit_model.classifier.1",
+        reference_layer_name="model.norm",
     )
 
     print("Correlation analysis completed.")

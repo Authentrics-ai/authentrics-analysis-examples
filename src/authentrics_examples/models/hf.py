@@ -101,7 +101,7 @@ class SimpleHFModel(ModelInterface):
                 # Fallback: set pad_token_id to 0 if eos_token_id is not available
                 self._module.tokenizer.pad_token_id = 0
 
-    def get_weight_bias(
+    def get_parameters(
         self,
         weight_names: Optional[list[str]] = None,
         bias_names: Optional[list[str]] = None,
@@ -157,7 +157,7 @@ class SimpleHFModel(ModelInterface):
             intermediate_outputs=intermediate_outputs,
         )
 
-    def set_weight_bias(self, weight_bias: WeightBias) -> None:
+    def set_parameters(self, weight_bias: WeightBias) -> None:
         state = {n: p for n, p in self._module.model.named_parameters()}
         for name, tensor in weight_bias.weights.items():
             if name in state:

@@ -3,16 +3,13 @@ from typing import Callable, Optional
 
 import numpy as np
 import torch
-import torchvision
 from PIL import Image
 
 from authentrics import (
     InferenceResult,
     ModelInterface,
-    Parameters,
-    WeightBias,
+    TensorDict,
 )
-
 
 classes = [
     "A10",
@@ -49,7 +46,6 @@ class MilAirModel(torch.nn.Module):
         self.squeeze_edit_model = torch.hub.load(
             "pytorch/vision:v0.20.1",
             "efficientnet_b3",
-            weights=torchvision.models.EfficientNet_B3_Weights.DEFAULT,
         )
 
         self.squeeze_edit_model.classifier[1] = torch.nn.Linear(1536, 256)
@@ -125,22 +121,15 @@ class SimpleModel(ModelInterface):
         self._module.to(device=self._device)
         self._module.eval()
 
-    def get_weight_bias(
+    def get_parameters(
         self,
-        weight_names: Optional[list[str]] = None,
-        bias_names: Optional[list[str]] = None,
-    ) -> WeightBias:
-        weights = {}
-        biases = {}
+        parameter_names: Optional[list[str]] = None,
+    ) -> TensorDict:
+        parameters = TensorDict()
         for name, param in self._module.named_parameters():
-            last_part = name.rsplit(".", 1)[-1]
-            if last_part == "weight":
-                if weight_names is None or name in weight_names:
-                    weights[name] = param
-            elif last_part == "bias":
-                if bias_names is None or name in bias_names:
-                    biases[name] = param
-        return weights, biases
+            if parameter_names is None or name in parameter_names:
+                parameters[name] = param
+        return parameters
 
     def perform_inference(
         self,
@@ -168,15 +157,12 @@ class SimpleModel(ModelInterface):
             for h in handles:
                 h.remove()
 
-        inter = Parameters(captured) if captured else {}
+        inter = TensorDict(captured) if captured else {}
         return InferenceResult(output, inter)
 
-    def set_weight_bias(self, weight_bias: WeightBias) -> None:
+    def set_parameters(self, parameters: TensorDict) -> None:
         state = {n: p for n, p in self._module.named_parameters()}
-        for name, tensor in weight_bias.weights.items():
-            if name in state:
-                state[name].data.copy_(tensor)
-        for name, tensor in weight_bias.biases.items():
+        for name, tensor in parameters.items():
             if name in state:
                 state[name].data.copy_(tensor)
 

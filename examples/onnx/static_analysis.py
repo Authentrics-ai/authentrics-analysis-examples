@@ -1,76 +1,49 @@
-import uuid
-from pathlib import Path
-from typing import Optional
+from authentrics import AuthentricsSession
 
-import onnx
-import onnx.tools.update_model_dims
-from onnx.numpy_helper import to_array
-
-from authentrics import AuthentricsSession, ModelInterface, Parameters, WeightBias
+from authentrics_examples.models.onnx import SimpleModel
+from authentrics_examples.config import get_example_data_path
 
 
-class RealisticModel(ModelInterface):
-    def load(self, model_path: str | Path):
-        if not isinstance(model_path, Path):
-            model_path = Path(model_path)
-        if not model_path.exists():
-            raise FileNotFoundError(f"Model path {model_path} does not exist")
-        if not model_path.is_file():
-            raise NotADirectoryError(f"Model path {model_path} is not a file")
+def main():
+    example_data_path = get_example_data_path(["checkpoint_1.onnx"])
 
-        self.model = onnx.load(model_path.as_posix())
+    # Create a session and a minimal model
+    model = SimpleModel()
+    session = AuthentricsSession(model)
 
-    def get_weight_bias(
-        self,
-        weight_names: Optional[list[str]] = None,
-        bias_names: Optional[list[str]] = None,
-    ) -> WeightBias:
-        weights = {}
-        biases = {}
-        for initializer in self.model.graph.initializer:
-            if "bias" in initializer.name:
-                biases[initializer.name] = to_array(initializer).copy()
-            else:
-                weights[initializer.name] = to_array(initializer).copy()
-        return WeightBias(Parameters(weights), Parameters(biases))
-
-
-if __name__ == "__main__":
     # Example checkpoint paths - update these to match your actual checkpoint files
-    checkpoint_paths = [
-        Path(f"/models/MilAirClassification/checkpoint_{i}.onnx") for i in range(1, 3)
-    ]
-
-    # Create a session
-    session = AuthentricsSession()
+    checkpoint_paths = [example_data_path / f"checkpoint_{i}.onnx" for i in range(1, 8)]
+    if any(not checkpoint.exists() for checkpoint in checkpoint_paths):
+        raise FileNotFoundError(f"Checkpoint files not found: {checkpoint_paths}")
 
     # Initialize a project (required for analysis operations)
-    project_path = Path("./my_analysis_project")
-    project_path.mkdir(parents=True, exist_ok=True)
-    project = session.init_project(
-        project_path,
-        "example_project_" + str(uuid.uuid4()),
-        "Example project for static_analysis",
+    project = session.get_or_create_project(
+        "MilAirClassificationExample:ONNX",
+        "Example project for ONNX-based CNN model",
     )
 
-    # Set a model on the session (required for analysis operations)
-    model = RealisticModel()
-    model.load(checkpoint_paths[0])
-    session.model = model
-
-    # Register all checkpoints, then select the ones needed for the analysis
-    project = session.add_checkpoints(project, *checkpoint_paths)
-
-    # Run static_analysis: project, then previous and chosen Checkpoint (two separate args).
-    # Optionally pass weight_names=[...] and/or bias_names=[...] to restrict to specific layers;
-    # omit both to analyze all weights and biases.
+    # Run static_analysis: project, then previous and chosen checkpoint (two separate args).
+    # parameter_names: list of parameter names to analyze
     result = session.static_analysis(
-        project,
-        project.checkpoints[0],
-        project.checkpoints[1],
-        # weight_names=["node_Gemm_844", "node_Gemm_850"],  # Omit to analyze all weights
-        # bias_names=["node_Bias_844", "node_Bias_850"],  # Omit to analyze all biases
+        project.id,
+        checkpoint_paths[0],
+        checkpoint_paths[1],
+        parameter_names=[
+            "squeeze_edit_model.features.0.0.weight",
+            "squeeze_edit_model.classifier.1.weight",
+            "squeeze_edit_model.classifier.4.weight",
+            "squeeze_edit_model.classifier.4.bias",
+        ],
     )
 
     print("Static analysis completed.")
-    print(f"Result: {result}")
+    print(result.summary_score)
+    print(result.parameter_changes)
+    print(result.parameter_histograms)
+
+    # Save the result to a file
+    result.to_hdf5(example_data_path / "static_analysis.h5")
+
+
+if __name__ == "__main__":
+    main()
