@@ -680,4 +680,4 @@ docker run --rm -it \
 
 If you have questions or feedback, contact us at [info@authentrics.ai](mailto:info@authentrics.ai).
 
-When reporting an issue, include the output of `authentrics.get_system_info()` (or `authrx sys-info` from the CLI).
+Before reporting an issue, please run `authrx collect-logs` and attach the generated file in your email. This will include logs of your recent Authentrics usage and a summary of your system/environment info. All generated logs have sensitive information redacted.
