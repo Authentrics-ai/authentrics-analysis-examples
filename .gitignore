@@ -5,3 +5,4 @@ __pycache__
 HF_*
 ONNX_*
 TORCH_*
+.env
