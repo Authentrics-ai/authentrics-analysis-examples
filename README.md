@@ -12,6 +12,24 @@ The notebooks themselves exemplify an implementation of a complete `ModelInterfa
 analysis we offer. The model checkpoints and sample data are pulled from a secondary Git LFS repo,
 [Authentrics-ai/authentrics-analysis-example-models](https://github.com/Authentrics-ai/authentrics-analysis-example-models).
 
-## Installing Authentrics
+## Running Notebooks
 
-Please follow the instructions on our [website](https://app.authentrics.ai/docs/setup).
+First, please follow the instructions on our [website](https://app.authentrics.ai/docs/setup) to sign up and receive
+a download link for the library (a wheel file).
+
+Once you have the wheel file, generate an API key on our website, install the wheel:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install path/to/wheelfile/authentrics-*.whl
+```
+
+and register your machine useing the API key:
+
+```bash
+$ authrx init
+Enter your API key: <paste it here>
+```
+
+Then you can open the notebook in your preferred runtime (using the same virtual environment) and enjoy!
