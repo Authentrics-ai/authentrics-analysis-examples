@@ -5,6 +5,7 @@ This repository contains examples of using the Authentrics Python Library.
 Each notebook shows a different model:
 
 - [A medical advice chatbot](./hf_medical_chatbot.ipynb)
+- [An example of task interference on an LLM](./hf_legal_understanding.ipynb)
 - [A CNN classifying military aircraft](./torch_military_aircraft.ipynb)
 - [The same CNN in ONNX format](./onnx_military_aircraft.ipynb)
 
