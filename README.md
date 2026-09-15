@@ -4,10 +4,10 @@ This repository contains examples of using the Authentrics Python Library.
 
 Each notebook shows a different model:
 
-- [A medical advice chatbot](./hf_medical_chatbot.ipynb)
-- [An example of task interference on an LLM](./hf_legal_understanding.ipynb)
-- [A CNN classifying military aircraft](./torch_military_aircraft.ipynb)
-- [The same CNN in ONNX format](./onnx_military_aircraft.ipynb)
+- [A medical advice chatbot](./hf_medical_chatbot.ipynb) — a LoRA-tuned LLM, walking through each analysis type across its fine-tuning checkpoints
+- [An example of task interference on an LLM](./hf_legal_understanding.ipynb) — detecting and fixing regressions caused by continued fine-tuning, without retraining
+- [A CNN classifying military aircraft](./torch_military_aircraft.ipynb) — tracing a mislabeled-data checkpoint back to its cause and impact
+- [The same CNN in ONNX format](./onnx_military_aircraft.ipynb) — the identical scenario, run against ONNX-exported checkpoints
 
 The notebooks themselves exemplify an implementation of a complete `ModelInterface` followed by each type of
 analysis we offer. The model checkpoints and sample data are pulled from a secondary Git LFS repo,
