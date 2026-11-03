@@ -34,3 +34,15 @@ Enter your API key: <paste it here>
 ```
 
 Then you can open the notebook in your preferred runtime (using the same virtual environment) and enjoy!
+
+## Known issues
+
+- **Platform support:** the published wheel only targets Python 3.12 on Linux x86_64. There is no
+  Windows or macOS wheel, so those platforms currently need a Linux container or VM.
+- **`transformers` version:** `hf_legal_understanding.ipynb` pins `transformers==5.2.0`, while
+  `hf_medical_chatbot.ipynb` pins `transformers~=4.53.3`. These two notebooks are not meant to
+  share one virtualenv — each notebook installs its own pinned dependencies in its first cell, so
+  run them in separate environments if you want to run more than one.
+- **Config keys:** the SDK's bundled CLI docs may refer to `log_level`/`logfile_level` as
+  settable config keys, but the actual persisted keys are `default_log_level` and
+  `default_logfile_level` — use those names with `authrx get`/`authrx set`.
