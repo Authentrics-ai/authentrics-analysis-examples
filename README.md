@@ -13,6 +13,9 @@ The notebooks themselves exemplify an implementation of a complete `ModelInterfa
 analysis we offer. The model checkpoints and sample data are pulled from a secondary Git LFS repo,
 [Authentrics-ai/authentrics-analysis-example-models](https://github.com/Authentrics-ai/authentrics-analysis-example-models).
 
+> **Note:** these notebooks are currently tested against `authentrics` SDK version `0.38.0`.
+> Other versions may require API adjustments.
+
 ## Running Notebooks
 
 First, please follow the instructions on our [website](https://app.authentrics.ai/docs/setup) to sign up and receive
@@ -34,3 +37,12 @@ Enter your API key: <paste it here>
 ```
 
 Then you can open the notebook in your preferred runtime (using the same virtual environment) and enjoy!
+
+## Known issues
+
+- **Platform support:** the published wheel only targets Python 3.12 on Linux x86_64. There is no
+  Windows or macOS wheel, so those platforms currently need a Linux container or VM.
+- **`transformers` version:** `hf_legal_understanding.ipynb` pins `transformers==5.2.0`, while
+  `hf_medical_chatbot.ipynb` pins `transformers~=4.53.3`. These two notebooks are not meant to
+  share one virtualenv — each notebook installs its own pinned dependencies in its first cell, so
+  run them in separate environments if you want to run more than one.
