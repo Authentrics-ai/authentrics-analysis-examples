@@ -33,6 +33,8 @@ is **not** shared between the two HF notebooks — each notebook installs its ow
 | `hf_legal_understanding.ipynb` | `==5.2.0` | `datasets==4.8.4`, `peft==0.18.1`, `rapidfuzz==3.14.3` |
 | `torch_military_aircraft.ipynb` | n/a | `torchvision`, `pillow` |
 | `onnx_military_aircraft.ipynb` | n/a | `onnx` (unpinned, resolved to `1.23.2`), `onnxruntime` (unpinned, resolved to `1.31.1`) |
+> **Note:** these notebooks are currently tested against `authentrics` SDK version `0.38.0`.
+> Other versions may require API adjustments.
 
 ## Running Notebooks
 
@@ -55,3 +57,12 @@ Enter your API key: <paste it here>
 ```
 
 Then you can open the notebook in your preferred runtime (using the same virtual environment) and enjoy!
+
+## Known issues
+
+- **Platform support:** the published wheel only targets Python 3.12 on Linux x86_64. There is no
+  Windows or macOS wheel, so those platforms currently need a Linux container or VM.
+- **`transformers` version:** `hf_legal_understanding.ipynb` pins `transformers==5.2.0`, while
+  `hf_medical_chatbot.ipynb` pins `transformers~=4.53.3`. These two notebooks are not meant to
+  share one virtualenv — each notebook installs its own pinned dependencies in its first cell, so
+  run them in separate environments if you want to run more than one.
