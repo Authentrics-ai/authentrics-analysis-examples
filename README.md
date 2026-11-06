@@ -13,6 +13,31 @@ The notebooks themselves exemplify an implementation of a complete `ModelInterfa
 analysis we offer. The model checkpoints and sample data are pulled from a secondary Git LFS repo,
 [Authentrics-ai/authentrics-analysis-example-models](https://github.com/Authentrics-ai/authentrics-analysis-example-models).
 
+## Reference Hardware & Configuration
+
+The notebooks were developed and run on the following setup. You don't need to match it exactly, but it's a
+useful reference if you hit performance differences or version mismatches.
+
+- **OS:** Ubuntu 24.04.4 LTS, kernel 7.0.0-1011-gcp
+- **CPU:** Intel Xeon @ 2.20GHz, 12 cores / 24 threads (1 socket)
+- **RAM:** 94 GiB
+- **GPU:** 2x NVIDIA L4 (24 GB each), driver 580.126.20, CUDA 12.8
+- **Python:** 3.12.3
+
+Key package versions:
+
+| Package | Version |
+| --- | --- |
+| `authentrics` | 0.38.0 |
+| `torch` | 2.10.0 |
+| `torchvision` | 0.25.0 |
+| `transformers` | 4.53.3 |
+| `sentence-transformers` | 5.7.0 |
+| `onnx` | 1.23.2 |
+| `onnxruntime` | 1.31.1 |
+| `scikit-learn` | 1.9.1 |
+| `numpy` | 2.4.3 |
+
 ## Running Notebooks
 
 First, please follow the instructions on our [website](https://app.authentrics.ai/docs/setup) to sign up and receive
