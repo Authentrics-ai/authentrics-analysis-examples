@@ -32,7 +32,7 @@ is **not** shared between the two HF notebooks — each notebook installs its ow
 | `hf_medical_chatbot.ipynb` | `~=4.53.3` | `torchvision`, `sentence-transformers`, `peft==0.18.1` |
 | `hf_legal_understanding.ipynb` | `==5.2.0` | `datasets==4.8.4`, `peft==0.18.1`, `rapidfuzz==3.14.3` |
 | `torch_military_aircraft.ipynb` | n/a | `torchvision`, `pillow` |
-| `onnx_military_aircraft.ipynb` | n/a | `onnx`, `onnxruntime` (unpinned — latest at install time) |
+| `onnx_military_aircraft.ipynb` | n/a | `onnx` (unpinned, resolved to `1.23.2`), `onnxruntime` (unpinned, resolved to `1.31.1`) |
 
 ## Running Notebooks
 
