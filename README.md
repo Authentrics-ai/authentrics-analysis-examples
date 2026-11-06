@@ -24,19 +24,15 @@ useful reference if you hit performance differences or version mismatches.
 - **GPU:** 2x NVIDIA L4 (24 GB each), driver 580.126.20, CUDA 12.8
 - **Python:** 3.12.3
 
-Key package versions:
+`authentrics` was `0.38.0` and `torch` was pinned to `2.10.0` across every notebook that uses it. `transformers`
+is **not** shared between the two HF notebooks — each notebook installs its own pins in its first cell:
 
-| Package | Version |
-| --- | --- |
-| `authentrics` | 0.38.0 |
-| `torch` | 2.10.0 |
-| `torchvision` | 0.25.0 |
-| `transformers` | 4.53.3 |
-| `sentence-transformers` | 5.7.0 |
-| `onnx` | 1.23.2 |
-| `onnxruntime` | 1.31.1 |
-| `scikit-learn` | 1.9.1 |
-| `numpy` | 2.4.3 |
+| Notebook | `transformers` | Other notable pins |
+| --- | --- | --- |
+| `hf_medical_chatbot.ipynb` | `~=4.53.3` | `torchvision`, `sentence-transformers`, `peft==0.18.1` |
+| `hf_legal_understanding.ipynb` | `==5.2.0` | `datasets==4.8.4`, `peft==0.18.1`, `rapidfuzz==3.14.3` |
+| `torch_military_aircraft.ipynb` | n/a | `torchvision`, `pillow` |
+| `onnx_military_aircraft.ipynb` | n/a | `onnx`, `onnxruntime` (unpinned — latest at install time) |
 
 ## Running Notebooks
 
