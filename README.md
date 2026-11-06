@@ -13,6 +13,26 @@ The notebooks themselves exemplify an implementation of a complete `ModelInterfa
 analysis we offer. The model checkpoints and sample data are pulled from a secondary Git LFS repo,
 [Authentrics-ai/authentrics-analysis-example-models](https://github.com/Authentrics-ai/authentrics-analysis-example-models).
 
+## Reference Hardware & Configuration
+
+The notebooks were developed and run on the following setup. You don't need to match it exactly, but it's a
+useful reference if you hit performance differences or version mismatches.
+
+- **OS:** Ubuntu 24.04.4 LTS, kernel 7.0.0-1011-gcp
+- **CPU:** Intel Xeon @ 2.20GHz, 12 cores / 24 threads (1 socket)
+- **RAM:** 94 GiB
+- **GPU:** 2x NVIDIA L4 (24 GB each), driver 580.126.20, CUDA 12.8
+- **Python:** 3.12.3
+
+`authentrics` was `0.38.0` and `torch` was pinned to `2.10.0` across every notebook that uses it. `transformers`
+is **not** shared between the two HF notebooks — each notebook installs its own pins in its first cell:
+
+| Notebook | `transformers` | Other notable pins |
+| --- | --- | --- |
+| `hf_medical_chatbot.ipynb` | `~=4.53.3` | `torchvision`, `sentence-transformers`, `peft==0.18.1` |
+| `hf_legal_understanding.ipynb` | `==5.2.0` | `datasets==4.8.4`, `peft==0.18.1`, `rapidfuzz==3.14.3` |
+| `torch_military_aircraft.ipynb` | n/a | `torchvision`, `pillow` |
+| `onnx_military_aircraft.ipynb` | n/a | `onnx` (unpinned, resolved to `1.23.2`), `onnxruntime` (unpinned, resolved to `1.31.1`) |
 > **Note:** these notebooks are currently tested against `authentrics` SDK version `0.38.0`.
 > Other versions may require API adjustments.
 
